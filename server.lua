@@ -15,19 +15,18 @@ local function HasPermissions(source)
     return false
 end 
 
-local function GetTableDump(dump, indent, getTable)
-
+local function GetTableDump(dump, indent, retrieve)
     local TableDump = ''
     local TotalIndexes = 0
     local ThisIndex = 0
     local TableName = nil
-    local indent = (indent or 0)
-    local getTable = (getTable or true)
+    local indent = indent or 0
+    local retrieve = retrieve or true
 
-    if getTable then
-        for Name_G, This_G in pairs(_G) do
-            if type(This_G) == 'table' and This_G == dump then
-                TableName = Name_G
+    if retrieve then
+        for name, table in pairs(_G) do
+            if type(table) == 'table' and table == dump then
+                TableName = name
                 indent += 1
                 TableDump = TableName .. ' = {\n'
                 break 
@@ -44,8 +43,9 @@ local function GetTableDump(dump, indent, getTable)
         if type(v) == 'table' then
             local TableSize = 0
             for _ in pairs(v) do
-                TableSize = (TableSize + 1)
+                TableSize += 1
             end
+            
             if TableSize > 0 then
                 TableDump = TableDump .. string.rep('    ', indent) .. (type(k) ~= 'number' and (k .. ' = ') or '') .. '{\n'
                 TableDump = TableDump .. GetTableDump(v, indent + 1, false)
@@ -58,11 +58,19 @@ local function GetTableDump(dump, indent, getTable)
         end
     end
 
-    if TableName ~= nil then
+    if TableName then
         TableDump = string.sub(TableDump, 1, #TableDump - 1) .. '\n}'
     end
     return TableDump
 end
+
+local function SaveFile(table)
+    local File = io.open(GetResourcePath(GetCurrentResourceName())..'/config.lua', 'w+')
+    if not File then return end 
+
+    File:write(GetTableDump(table))
+    File:close()
+end 
 
 local function CreateZone(action, index)
     if HasPermissions(source) then 
@@ -77,17 +85,11 @@ local function CreateZone(action, index)
             }
             Zones[#Zones+1] = t
             TriggerClientEvent('Greenzone:Added', -1 , t)
-            local File = io.open(GetResourcePath(GetCurrentResourceName())..'/config.lua', 'w+')
-            if not File then return end 
-            File:write(GetTableDump(Zones))
-            File:close()
+            SaveFile(Zones)
+
         elseif action == 2 then 
             table.remove(Zones, index)
-            local File = io.open(GetResourcePath(GetCurrentResourceName())..'/config.lua', 'w+')
-            if not File then return end 
-            File:write(GetTableDump(Zones))
-            File:close()
-            Wait(50)
+            SaveFile(Zones)
             TriggerClientEvent('Greenzone:Remove', -1)
 
         else 

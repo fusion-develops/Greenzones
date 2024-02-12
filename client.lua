@@ -25,14 +25,13 @@ end
 local function CreateZone(data)
     CreatedZones[#CreatedZones+1] = lib.zones[data.type]({
         coords = data.coords,
-        radius = data.type == 'sphere' and data.size or data.type == 'box' and vec3(data.size, data.size, data.size),
+        radius = data.type == 'sphere' and data.size or data.type == 'box' and vec3(data.size.. '.0', data.size.. '.0', data.size.. '.0'),
         onEnter = Update,
         onExit = Update,
         debug = true
     })
-    if data.blip then 
-        return createblip(data.coords)
-    end
+
+    return data.blip and createblip(data.coords)
 end 
 
 
@@ -75,8 +74,6 @@ local function OpenEditMenu(id)
         options = {
             {label = 'Teleport', close = false},
             {label = 'Delete Zone'},
-
-    
         }
         
     }, function (selected)
@@ -86,7 +83,6 @@ local function OpenEditMenu(id)
             TriggerServerEvent('zone:settings', 2, id)
         end 
     end)
-
 
     lib.showMenu('edit')
 end 
@@ -99,7 +95,6 @@ lib.registerMenu({
         {label = 'Create Zone'},
         {label = 'Delete Zone'},
         {label = 'Create Zone'},
-
     }
     
 }, function (selected)
@@ -136,7 +131,6 @@ RegisterNetEvent('Greenzone:Remove', function ()
     for i = 1, #Zones do 
         CreateZone(Zones[i])
     end 
-
 end)
 
 local function OpenMenu()
