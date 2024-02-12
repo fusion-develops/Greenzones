@@ -1,5 +1,5 @@
 local function createblip(coords)
----@diagnostic disable-next-line: missing-parameter
+    ---@diagnostic disable-next-line: missing-parameter
     local Blip = AddBlipForCoord(coords)
     SetBlipSprite(Blip, 1)
 	SetBlipScale(Blip, 0.7)
